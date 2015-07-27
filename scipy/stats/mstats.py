@@ -74,6 +74,7 @@ is a relatively new package, some API changes are still possible.
 """
 from __future__ import division, print_function, absolute_import
 
-from .mstats_basic import *
+# from .mstats_basic import *
+from . import mstats_add_docs
 from .mstats_extras import *
 from scipy.stats import gmean, hmean

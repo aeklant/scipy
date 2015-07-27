@@ -46,8 +46,14 @@ import itertools
 import warnings
 from collections import namedtuple
 
-from . import stats
+# from . import mstats_add_docs
 from . import distributions
+from .stats import chisquare as stats_chisquare
+from .stats import zmap as stats_zmap
+from .stats import zscore as stats_zscore
+from .stats import theilslopes as stats_theilslopes
+from .stats import linregress as stats_linregress
+from .stats import ks_2samp as stats_ks_2samp
 import scipy.special as special
 from . import futil
 
@@ -287,14 +293,14 @@ def mode(a, axis=0):
 
     ModeResult = namedtuple('ModeResult', ('mode', 'count'))
     return ModeResult(*output)
-mode.__doc__ = stats.mode.__doc__
+# mode.__doc__ = mstats_add_docs.stats.mode.__doc__
 
 
 @np.deprecate(message="mstats.betai is deprecated in scipy 0.17.0; "
               "use special.betainc instead.")
 def betai(a, b, x):
     return _betai(a, b, x)
-betai.__doc__ = stats.betai.__doc__
+# betai.__doc__ = stats.betai.__doc__
 
 
 def _betai(a, b, x):
@@ -630,8 +636,8 @@ def pointbiserialr(x, y):
                                                                'pvalue'))
     return PointbiserialrResult(rpb, prob)
 
-if stats.pointbiserialr.__doc__:
-    pointbiserialr.__doc__ = stats.pointbiserialr.__doc__ + genmissingvaldoc
+# if stats.pointbiserialr.__doc__:
+#     pointbiserialr.__doc__ = stats.pointbiserialr.__doc__ + genmissingvaldoc
 
 
 def linregress(*args):
@@ -661,21 +667,21 @@ def linregress(*args):
         x = ma.array(x, mask=m)
         y = ma.array(y, mask=m)
         if np.any(~m):
-            slope, intercept, r, prob, sterrest = stats.linregress(x.data[~m],
+            slope, intercept, r, prob, sterrest = stats_linregress(x.data[~m],
                                                                    y.data[~m])
         else:
             # All data is masked
             return None, None, None, None, None
     else:
-        slope, intercept, r, prob, sterrest = stats.linregress(x.data, y.data)
+        slope, intercept, r, prob, sterrest = stats_linregress(x.data, y.data)
 
     LinregressResult = namedtuple('LinregressResult', ('slope', 'intercept',
                                                        'rvalue', 'pvalue',
                                                        'stderr'))
     return LinregressResult(slope, intercept, r, prob, sterrest)
 
-if stats.linregress.__doc__:
-    linregress.__doc__ = stats.linregress.__doc__ + genmissingvaldoc
+# if stats.linregress.__doc__:
+#     linregress.__doc__ = stats.linregress.__doc__ + genmissingvaldoc
 
 
 def theilslopes(y, x=None, alpha=0.95):
@@ -693,8 +699,8 @@ def theilslopes(y, x=None, alpha=0.95):
     y = y.compressed()
     x = x.compressed().astype(float)
     # We now have unmasked arrays so can use `stats.theilslopes`
-    return stats.theilslopes(y, x, alpha=alpha)
-theilslopes.__doc__ = stats.theilslopes.__doc__
+    return stats_theilslopes(y, x, alpha=alpha)
+# theilslopes.__doc__ = stats.theilslopes.__doc__
 
 
 def sen_seasonal_slopes(x):
@@ -723,7 +729,7 @@ def ttest_1samp(a, popmean, axis=0):
 
     Ttest_1sampResult = namedtuple('Ttest_1sampResult', ('statistic', 'pvalue'))
     return Ttest_1sampResult(t, prob)
-ttest_1samp.__doc__ = stats.ttest_1samp.__doc__
+# ttest_1samp.__doc__ = stats.ttest_1samp.__doc__
 ttest_onesamp = ttest_1samp
 
 
@@ -744,7 +750,7 @@ def ttest_ind(a, b, axis=0):
     probs = _betai(0.5*df, 0.5, df/(df + t*t)).reshape(t.shape)
 
     return Ttest_indResult(t, probs.squeeze())
-ttest_ind.__doc__ = stats.ttest_ind.__doc__
+# ttest_ind.__doc__ = stats.ttest_ind.__doc__
 
 
 def ttest_rel(a, b, axis=0):
@@ -765,14 +771,14 @@ def ttest_rel(a, b, axis=0):
     probs = _betai(0.5*df, 0.5, df/(df + t*t)).reshape(t.shape).squeeze()
 
     return Ttest_relResult(t, probs)
-ttest_rel.__doc__ = stats.ttest_rel.__doc__
+# ttest_rel.__doc__ = stats.ttest_rel.__doc__
 
 
 # stats.chisquare works with masked arrays, so we don't need to
 # implement it here.
 # For backwards compatibilty, stats.chisquare is included in
 # the stats.mstats namespace.
-chisquare = stats.chisquare
+chisquare = stats_chisquare
 
 
 def mannwhitneyu(x,y, use_continuity=True):
@@ -840,12 +846,12 @@ def kruskalwallis(*args):
 
     H /= T
     df = len(output) - 1
-    prob = stats.distributions.chi2.sf(H, df)
+    prob = distributions.chi2.sf(H, df)
 
     KruskalResult = namedtuple('KruskalResult', ('statistic', 'pvalue'))
     return KruskalResult(H, prob)
 kruskal = kruskalwallis
-kruskalwallis.__doc__ = stats.kruskal.__doc__
+# kruskalwallis.__doc__ = stats.kruskal.__doc__
 
 
 def ks_twosamp(data1, data2, alternative="two-sided"):
@@ -908,7 +914,7 @@ def ks_twosamp_old(data1, data2):
 
     """
     (data1, data2) = [ma.asarray(d).compressed() for d in (data1,data2)]
-    return stats.ks_2samp(data1,data2)
+    return stats_ks_2samp(data1,data2)
 
 
 @np.deprecate(message="mstats.threshold is deprecated in scipy 0.17.0")
@@ -1115,8 +1121,8 @@ def trim(a, limits=None, inclusive=(True,True), relative=False, axis=None):
     else:
         return trima(a, limits=limits, inclusive=inclusive)
 
-if trim.__doc__ is not None:
-    trim.__doc__ = trim.__doc__ % trimdoc
+# if trim.__doc__ is not None:
+#     trim.__doc__ = trim.__doc__ % trimdoc
 
 
 def trimboth(data, proportiontocut=0.2, inclusive=(True,True), axis=None):
@@ -1327,7 +1333,7 @@ def trimmed_stde(a, limits=(0.1,0.1), inclusive=(1,1), axis=None):
 
 def tmean(a, limits=None, inclusive=(True,True)):
     return trima(a, limits=limits, inclusive=inclusive).mean()
-tmean.__doc__ = stats.tmean.__doc__
+# tmean.__doc__ = stats.tmean.__doc__
 
 
 def tvar(a, limits=None, inclusive=(True,True)):
@@ -1339,21 +1345,21 @@ def tvar(a, limits=None, inclusive=(True,True)):
         raise ValueError('mstats.tvar() with limits not implemented yet so far')
 
     return r
-tvar.__doc__ = stats.tvar.__doc__
+# tvar.__doc__ = stats.tvar.__doc__
 
 
 def tmin(a, lowerlimit=None, axis=0, inclusive=True):
     a, axis = _chk_asarray(a, axis)
     am = trima(a, (lowerlimit, None), (inclusive, False))
     return ma.minimum.reduce(am, axis)
-tmin.__doc__ = stats.tmin.__doc__
+# tmin.__doc__ = stats.tmin.__doc__
 
 
 def tmax(a, upperlimit, axis=0, inclusive=True):
     a, axis = _chk_asarray(a, axis)
     am = trima(a, (None, upperlimit), (False, inclusive))
     return ma.maximum.reduce(am, axis)
-tmax.__doc__ = stats.tmax.__doc__
+# tmax.__doc__ = stats.tmax.__doc__
 
 
 def tsem(a, limits=None, inclusive=(True,True)):
@@ -1365,7 +1371,7 @@ def tsem(a, limits=None, inclusive=(True,True)):
     am = trima(a.ravel(), limits, inclusive)
     sd = np.sqrt(am.var(ddof=1))
     return sd / np.sqrt(am.count())
-tsem.__doc__ = stats.tsem.__doc__
+# tsem.__doc__ = stats.tsem.__doc__
 
 
 def winsorize(a, limits=None, inclusive=(True, True), inplace=False,
@@ -1486,13 +1492,13 @@ def moment(a, moment=1, axis=0):
             if n % 2:
                 s *= a_zero_mean
         return s.mean(axis)
-moment.__doc__ = stats.moment.__doc__
+# moment.__doc__ = stats.moment.__doc__
 
 
 def variation(a, axis=0):
     a, axis = _chk_asarray(a, axis)
     return a.std(axis)/a.mean(axis)
-variation.__doc__ = stats.variation.__doc__
+# variation.__doc__ = stats.variation.__doc__
 
 
 def skew(a, axis=0, bias=True):
@@ -1514,7 +1520,7 @@ def skew(a, axis=0, bias=True):
             nval = ma.sqrt((n-1.0)*n)/(n-2.0)*m3/m2**1.5
             np.place(vals, can_correct, nval)
     return vals
-skew.__doc__ = stats.skew.__doc__
+# skew.__doc__ = stats.skew.__doc__
 
 
 def kurtosis(a, axis=0, fisher=True, bias=True):
@@ -1540,7 +1546,7 @@ def kurtosis(a, axis=0, fisher=True, bias=True):
         return vals - 3
     else:
         return vals
-kurtosis.__doc__ = stats.kurtosis.__doc__
+# kurtosis.__doc__ = stats.kurtosis.__doc__
 
 
 def describe(a, axis=0, ddof=0):
@@ -1661,7 +1667,7 @@ def skewtest(a, axis=0):
 
     SkewtestResult = namedtuple('SkewtestResult', ('statistic', 'pvalue'))
     return SkewtestResult(Z, 2 * distributions.norm.sf(np.abs(Z)))
-skewtest.__doc__ = stats.skewtest.__doc__
+# skewtest.__doc__ = stats.skewtest.__doc__
 
 
 def kurtosistest(a, axis=0):
@@ -1697,7 +1703,7 @@ def kurtosistest(a, axis=0):
     KurtosistestResult = namedtuple('KurtosistestResult', ('statistic',
                                                            'pvalue'))
     return KurtosistestResult(Z, 2 * distributions.norm.sf(np.abs(Z)))
-kurtosistest.__doc__ = stats.kurtosistest.__doc__
+# kurtosistest.__doc__ = stats.kurtosistest.__doc__
 
 
 def normaltest(a, axis=0):
@@ -1707,8 +1713,8 @@ def normaltest(a, axis=0):
     k2 = s*s + k*k
 
     NormaltestResult = namedtuple('NormaltestResult', ('statistic', 'pvalue'))
-    return NormaltestResult(k2, stats.distributions.chi2.sf(k2, 2))
-normaltest.__doc__ = stats.normaltest.__doc__
+    return NormaltestResult(k2, distributions.chi2.sf(k2, 2))
+# normaltest.__doc__ = stats.normaltest.__doc__
 
 
 def mquantiles(a, prob=list([.25,.5,.75]), alphap=.4, betap=.4, axis=None,
@@ -2009,8 +2015,8 @@ def sem(a, axis=0, ddof=1):
     return s
 
 
-zmap = stats.zmap
-zscore = stats.zscore
+zmap = stats_zmap
+zscore = stats_zscore
 
 
 def f_oneway(*args):
@@ -2112,4 +2118,4 @@ def friedmanchisquare(*args):
     FriedmanchisquareResult = namedtuple('FriedmanchisquareResult',
                                          ('statistic', 'pvalue'))
     return FriedmanchisquareResult(chisq,
-                                   stats.distributions.chi2.sf(chisq, k-1))
+                                   distributions.chi2.sf(chisq, k-1))
